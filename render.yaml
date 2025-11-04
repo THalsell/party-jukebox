@@ -6,8 +6,10 @@ databases:
 services:
   - type: web
     name: party-jukebox
-    runtime: docker
+    runtime: elixir
     plan: free
+    buildCommand: "./render-build.sh"
+    startCommand: "_build/prod/rel/party_jukebox/bin/party_jukebox start"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -21,3 +23,5 @@ services:
         sync: false
       - key: POOL_SIZE
         value: 2
+      - key: PHX_SERVER
+        value: true
