@@ -16,30 +16,30 @@ end
 
   def search(query, max_results \\ 10) do
     api_key = System.get_env("YOUTUBE_API_KEY")
-    
-    unless api_key do
+
+    if !api_key do
       {:error, "YouTube API key not configured"}
-    end
+    else
+      url = "#{@base_url}/search?" <>
+            URI.encode_query(%{
+              part: "snippet",
+              q: query,
+              type: "video",
+              videoCategoryId: "10", # Music category
+              maxResults: max_results,
+              key: api_key
+            })
 
-    url = "#{@base_url}/search?" <>
-          URI.encode_query(%{
-            part: "snippet",
-            q: query,
-            type: "video",
-            videoCategoryId: "10", # Music category
-            maxResults: max_results,
-            key: api_key
-          })
+      case HTTPoison.get(url) do
+        {:ok, %{status_code: 200, body: body}} ->
+          parse_search_results(body)
 
-    case HTTPoison.get(url) do
-      {:ok, %{status_code: 200, body: body}} ->
-        parse_search_results(body)
-      
-      {:ok, %{status_code: status_code}} ->
-        {:error, "YouTube API returned status #{status_code}"}
-      
-      {:error, %{reason: reason}} ->
-        {:error, "Failed to connect to YouTube API: #{reason}"}
+        {:ok, %{status_code: status_code}} ->
+          {:error, "YouTube API returned status #{status_code}"}
+
+        {:error, %{reason: reason}} ->
+          {:error, "Failed to connect to YouTube API: #{reason}"}
+      end
     end
   end
 

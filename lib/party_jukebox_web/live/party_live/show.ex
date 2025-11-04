@@ -19,13 +19,15 @@ defmodule PartyJukeboxWeb.PartyLive.Show do
 
         party = Parties.get_party_with_current_song(party.id)
         queue = Parties.list_queue(party.id)
+        qr_code = generate_qr_code(party.code)
         
         {:ok,
          socket
          |> assign(:party, party)
          |> assign(:queue, queue)
          |> assign(:search_results, [])
-         |> assign(:currently_playing, party.currently_playing)}
+         |> assign(:currently_playing, party.currently_playing)
+         |> assign(:qr_code, qr_code)}
     end
   end
 
@@ -141,4 +143,24 @@ defmodule PartyJukeboxWeb.PartyLive.Show do
      |> assign(:currently_playing, party.currently_playing)
      |> assign(:queue, queue)}
   end
+
+ defp generate_qr_code(party_code) do
+  endpoint_config = Application.get_env(:party_jukebox, PartyJukeboxWeb.Endpoint)
+  url_config = endpoint_config[:url] || []
+
+  host = url_config[:host] || "localhost"
+  scheme = url_config[:scheme] || "http"
+  port = url_config[:port]
+
+  url = case {scheme, port} do
+    {"https", 443} -> "#{scheme}://#{host}/party/#{party_code}"
+    {"http", 80} -> "#{scheme}://#{host}/party/#{party_code}"
+    {_, nil} -> "#{scheme}://#{host}/party/#{party_code}"
+    {_, port} -> "#{scheme}://#{host}:#{port}/party/#{party_code}"
+  end
+
+  url
+  |> EQRCode.encode()
+  |> EQRCode.svg(width: 200, height: 200, viewbox: true)
+end
 end
