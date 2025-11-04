@@ -8,6 +8,7 @@ defmodule PartyJukebox.Party do
     field :status, :string
     
     has_many :queued_songs, PartyJukebox.QueuedSong
+    belongs_to :currently_playing, PartyJukebox.QueuedSong
 
     timestamps(type: :utc_datetime)
   end

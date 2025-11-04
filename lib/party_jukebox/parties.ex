@@ -50,6 +50,66 @@ defmodule PartyJukebox.Parties do
     |> Repo.all()
   end
 
+  @doc """
+Starts playing the first song in the queue.
+"""
+def play_next_song(party_id) do
+  party = Repo.get!(Party, party_id) |> Repo.preload(:currently_playing)
+  
+  # Get the next song in queue
+  next_song = QueuedSong
+              |> where([s], s.party_id == ^party_id)
+              |> order_by([s], s.position)
+              |> limit(1)
+              |> Repo.one()
+  
+  case next_song do
+    nil -> 
+      # No songs in queue, stop playing
+      party
+      |> Ecto.Changeset.change(%{currently_playing_id: nil})
+      |> Repo.update()
+    
+    song ->
+      # Set this song as currently playing
+      party
+      |> Ecto.Changeset.change(%{currently_playing_id: song.id})
+      |> Repo.update()
+  end
+end
+
+@doc """
+Removes a song from the queue and plays next if it was currently playing.
+"""
+def remove_song(song_id) do
+  song = Repo.get(QueuedSong, song_id)
+  
+  if song do
+    party = Repo.get!(Party, song.party_id) |> Repo.preload(:currently_playing)
+    was_playing = party.currently_playing_id == song_id
+    
+    Repo.delete(song)
+    
+    # If we deleted the currently playing song, play next
+    if was_playing do
+      play_next_song(party.id)
+    else
+      {:ok, song}
+    end
+  else
+    {:error, :not_found}
+  end
+end
+
+@doc """
+Gets a party with its currently playing song preloaded.
+"""
+def get_party_with_current_song(party_id) do
+  Party
+  |> Repo.get(party_id)
+  |> Repo.preload(:currently_playing)
+end
+
   # Private helper functions
 
   defp generate_party_code do

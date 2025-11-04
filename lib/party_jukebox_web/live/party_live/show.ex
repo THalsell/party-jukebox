@@ -17,53 +17,17 @@ defmodule PartyJukeboxWeb.PartyLive.Show do
           Phoenix.PubSub.subscribe(PartyJukebox.PubSub, "party:#{party.id}")
         end
 
+        party = Parties.get_party_with_current_song(party.id)
         queue = Parties.list_queue(party.id)
         
         {:ok,
- socket
- |> assign(:party, party)
- |> assign(:queue, queue)
- |> assign(:search_results, [])}
+         socket
+         |> assign(:party, party)
+         |> assign(:queue, queue)
+         |> assign(:search_results, [])
+         |> assign(:currently_playing, party.currently_playing)}
     end
   end
-
-  @impl true
-def handle_event("search_youtube", %{"query" => query}, socket) do
-  case PartyJukebox.YouTube.search(query, 5) do
-    {:ok, results} ->
-      {:noreply, assign(socket, :search_results, results)}
-    
-    {:error, _reason} ->
-      {:noreply, 
-       socket
-       |> put_flash(:error, "Failed to search YouTube")
-       |> assign(:search_results, [])}
-  end
-end
-
-@impl true
-def handle_event("add_youtube_song", %{"video_id" => video_id, "title" => title, "channel" => channel, "added_by" => added_by}, socket) do
-  song_attrs = %{
-    title: title,
-    artist: channel,
-    added_by: added_by,
-    external_id: "youtube:#{video_id}"
-  }
-
-  case Parties.add_song_to_queue(socket.assigns.party.id, song_attrs) do
-    {:ok, _song} ->
-      Phoenix.PubSub.broadcast(
-        PartyJukebox.PubSub,
-        "party:#{socket.assigns.party.id}",
-        :queue_updated
-      )
-      
-      {:noreply, assign(socket, :search_results, [])}
-    
-    {:error, _changeset} ->
-      {:noreply, put_flash(socket, :error, "Failed to add song")}
-  end
-end
 
   @impl true
   def handle_event("add_song", %{"title" => title, "artist" => artist, "added_by" => added_by}, socket) do
@@ -76,7 +40,6 @@ end
 
     case Parties.add_song_to_queue(socket.assigns.party.id, song_attrs) do
       {:ok, _song} ->
-        # Broadcast to all connected clients
         Phoenix.PubSub.broadcast(
           PartyJukebox.PubSub,
           "party:#{socket.assigns.party.id}",
@@ -91,8 +54,91 @@ end
   end
 
   @impl true
+  def handle_event("search_youtube", %{"query" => query}, socket) do
+    case PartyJukebox.YouTube.search(query, 5) do
+      {:ok, results} ->
+        {:noreply, assign(socket, :search_results, results)}
+      
+      {:error, _reason} ->
+        {:noreply, 
+         socket
+         |> put_flash(:error, "Failed to search YouTube")
+         |> assign(:search_results, [])}
+    end
+  end
+
+  @impl true
+  def handle_event("add_youtube_song", %{"video_id" => video_id, "title" => title, "channel" => channel, "added_by" => added_by}, socket) do
+    song_attrs = %{
+      title: title,
+      artist: channel,
+      added_by: added_by,
+      external_id: "youtube:#{video_id}"
+    }
+
+    case Parties.add_song_to_queue(socket.assigns.party.id, song_attrs) do
+      {:ok, _song} ->
+        Phoenix.PubSub.broadcast(
+          PartyJukebox.PubSub,
+          "party:#{socket.assigns.party.id}",
+          :queue_updated
+        )
+        
+        {:noreply, assign(socket, :search_results, [])}
+      
+      {:error, _changeset} ->
+        {:noreply, put_flash(socket, :error, "Failed to add song")}
+    end
+  end
+
+  @impl true
+  def handle_event("play_next", _params, socket) do
+    {:ok, _party} = Parties.play_next_song(socket.assigns.party.id)
+    
+    Phoenix.PubSub.broadcast(
+      PartyJukebox.PubSub,
+      "party:#{socket.assigns.party.id}",
+      :playback_updated
+    )
+    
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("remove_song", %{"song_id" => song_id}, socket) do
+    song_id = String.to_integer(song_id)
+    Parties.remove_song(song_id)
+    
+    Phoenix.PubSub.broadcast(
+      PartyJukebox.PubSub,
+      "party:#{socket.assigns.party.id}",
+      :queue_updated
+    )
+    
+    Phoenix.PubSub.broadcast(
+      PartyJukebox.PubSub,
+      "party:#{socket.assigns.party.id}",
+      :playback_updated
+    )
+    
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_info(:queue_updated, socket) do
     queue = Parties.list_queue(socket.assigns.party.id)
     {:noreply, assign(socket, :queue, queue)}
+  end
+
+  @impl true
+  def handle_info(:playback_updated, socket) do
+    party = Parties.get_party_with_current_song(socket.assigns.party.id)
+    queue = Parties.list_queue(socket.assigns.party.id)
+    
+    {:noreply, 
+     socket
+     |> assign(:party, party)
+     |> assign(:currently_playing, party.currently_playing)
+     |> assign(:queue, queue)}
   end
 end
