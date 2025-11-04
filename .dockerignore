@@ -1,0 +1,40 @@
+# Build artifacts
+/_build/
+/deps/
+*.ez
+
+# Development files
+.env
+.env.*
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+!README.md
+
+# Test files
+/test/
+/cover/
+
+# Node modules (will be installed during build if needed)
+/assets/node_modules/
+
+# Generated files
+/priv/static/assets/
+/priv/static/cache_manifest.json
+
+# Logs
+*.log
+npm-debug.log
+erl_crash.dump

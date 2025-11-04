@@ -14,6 +14,7 @@ COPY lib lib
 COPY priv priv
 COPY assets assets
 COPY config config
+COPY rel rel
 
 RUN mix deps.compile
 
