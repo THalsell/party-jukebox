@@ -1,0 +1,51 @@
+<div class="max-w-2xl mx-auto mt-8 p-6">
+  <h1 class="text-4xl font-bold text-center mb-8">Party Jukebox 🎵</h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Create Party Card -->
+    <div class="bg-white shadow-lg rounded-lg p-6">
+      <h2 class="text-2xl font-semibold mb-4">Host a Party</h2>
+      <.form for={%{}} phx-submit="create_party">
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-2">Your Name</label>
+          <input 
+            type="text" 
+            name="host_name" 
+            placeholder="DJ Tiffany"
+            required
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <button 
+          type="submit"
+          class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
+        >
+          Create Party
+        </button>
+      </.form>
+    </div>
+
+    <!-- Join Party Card -->
+    <div class="bg-white shadow-lg rounded-lg p-6">
+      <h2 class="text-2xl font-semibold mb-4">Join a Party</h2>
+      <.form for={%{}} phx-submit="join_party">
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-2">Party Code</label>
+          <input 
+            type="text" 
+            name="code" 
+            placeholder="A8A5BF"
+            required
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+          />
+        </div>
+        <button 
+          type="submit"
+          class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition"
+        >
+          Join Party
+        </button>
+      </.form>
+    </div>
+  </div>
+</div>

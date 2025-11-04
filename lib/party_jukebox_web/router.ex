@@ -15,10 +15,11 @@ defmodule PartyJukeboxWeb.Router do
   end
 
   scope "/", PartyJukeboxWeb do
-    pipe_through :browser
+  pipe_through :browser
 
-    get "/", PageController, :home
-  end
+  live "/", PartyLive.Index, :index
+  live "/party/:code", PartyLive.Show, :show
+end
 
   # Other scopes may use custom stacks.
   # scope "/api", PartyJukeboxWeb do
