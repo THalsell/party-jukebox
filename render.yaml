@@ -8,7 +8,6 @@ services:
     name: party-jukebox
     runtime: docker
     plan: free
-    preDeployCommand: "./bin/migrate"
     envVars:
       - key: DATABASE_URL
         fromDatabase:

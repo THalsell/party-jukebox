@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+
+cd -P -- "$(dirname -- "$0")"
+
+echo "Running migrations..."
+./party_jukebox eval PartyJukebox.Release.migrate
+
+echo "Starting server..."
+PHX_SERVER=true exec ./party_jukebox start

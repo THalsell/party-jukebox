@@ -37,4 +37,4 @@ WORKDIR "/app"
 
 COPY --from=builder /app/_build/prod/rel/party_jukebox ./
 
-CMD ["/app/bin/server"]
+CMD ["/app/bin/server-with-migrate"]
