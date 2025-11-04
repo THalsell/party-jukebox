@@ -20,12 +20,50 @@ defmodule PartyJukeboxWeb.PartyLive.Show do
         queue = Parties.list_queue(party.id)
         
         {:ok,
-         socket
-         |> assign(:party, party)
-         |> assign(:queue, queue)
-         |> assign(:guest_name, "")}
+ socket
+ |> assign(:party, party)
+ |> assign(:queue, queue)
+ |> assign(:search_results, [])}
     end
   end
+
+  @impl true
+def handle_event("search_youtube", %{"query" => query}, socket) do
+  case PartyJukebox.YouTube.search(query, 5) do
+    {:ok, results} ->
+      {:noreply, assign(socket, :search_results, results)}
+    
+    {:error, _reason} ->
+      {:noreply, 
+       socket
+       |> put_flash(:error, "Failed to search YouTube")
+       |> assign(:search_results, [])}
+  end
+end
+
+@impl true
+def handle_event("add_youtube_song", %{"video_id" => video_id, "title" => title, "channel" => channel, "added_by" => added_by}, socket) do
+  song_attrs = %{
+    title: title,
+    artist: channel,
+    added_by: added_by,
+    external_id: "youtube:#{video_id}"
+  }
+
+  case Parties.add_song_to_queue(socket.assigns.party.id, song_attrs) do
+    {:ok, _song} ->
+      Phoenix.PubSub.broadcast(
+        PartyJukebox.PubSub,
+        "party:#{socket.assigns.party.id}",
+        :queue_updated
+      )
+      
+      {:noreply, assign(socket, :search_results, [])}
+    
+    {:error, _changeset} ->
+      {:noreply, put_flash(socket, :error, "Failed to add song")}
+  end
+end
 
   @impl true
   def handle_event("add_song", %{"title" => title, "artist" => artist, "added_by" => added_by}, socket) do

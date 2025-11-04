@@ -7,50 +7,108 @@
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <!-- Add Song Form -->
+    <!-- Search and Add Song -->
     <div class="bg-white shadow-lg rounded-lg p-6">
-      <h2 class="text-2xl font-semibold mb-4">Add a Song</h2>
-      <.form for={%{}} phx-submit="add_song">
+      <h2 class="text-2xl font-semibold mb-4">Search & Add Songs</h2>
+      
+      <!-- YouTube Search -->
+      <.form for={%{}} phx-submit="search_youtube" class="mb-4">
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-2">Your Name</label>
-          <input 
-            type="text" 
-            name="added_by" 
-            placeholder="Guest Name"
-            required
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
+          <label class="block text-sm font-medium mb-2">Search YouTube</label>
+          <div class="flex gap-2">
+            <input 
+              type="text" 
+              name="query" 
+              placeholder="Search for a song..."
+              required
+              class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+            <button 
+              type="submit"
+              class="bg-purple-600 text-white py-2 px-6 rounded-md hover:bg-purple-700 transition"
+            >
+              Search
+            </button>
+          </div>
         </div>
-        
-        <div class="mb-4">
-          <label class="block text-sm font-medium mb-2">Song Title</label>
-          <input 
-            type="text" 
-            name="title" 
-            placeholder="Bohemian Rhapsody"
-            required
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
-        </div>
-
-        <div class="mb-4">
-          <label class="block text-sm font-medium mb-2">Artist</label>
-          <input 
-            type="text" 
-            name="artist" 
-            placeholder="Queen"
-            required
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
-        </div>
-
-        <button 
-          type="submit"
-          class="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition"
-        >
-          Add to Queue
-        </button>
       </.form>
+
+      <!-- Search Results -->
+      <%= if @search_results != [] do %>
+        <div class="space-y-2 mb-4">
+          <h3 class="font-semibold">Search Results:</h3>
+          <%= for result <- @search_results do %>
+            <div class="border border-gray-200 rounded-lg p-3 flex items-center gap-3 hover:bg-gray-50">
+              <img src={result.thumbnail} alt={result.title} class="w-16 h-12 object-cover rounded" />
+              <div class="flex-1">
+                <p class="font-medium text-sm"><%= result.title %></p>
+                <p class="text-xs text-gray-600"><%= result.channel %></p>
+              </div>
+              <.form for={%{}} phx-submit="add_youtube_song">
+                <input type="hidden" name="video_id" value={result.video_id} />
+                <input type="hidden" name="title" value={result.title} />
+                <input type="hidden" name="channel" value={result.channel} />
+                <input 
+                  type="text" 
+                  name="added_by" 
+                  placeholder="Your name"
+                  required
+                  class="w-32 px-2 py-1 text-sm border border-gray-300 rounded-md mr-2"
+                />
+                <button 
+                  type="submit"
+                  class="bg-green-600 text-white py-1 px-3 rounded-md hover:bg-green-700 transition text-sm"
+                >
+                  Add
+                </button>
+              </.form>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <!-- Manual Add (Optional) -->
+      <details class="mt-4">
+        <summary class="cursor-pointer text-sm text-gray-600 hover:text-gray-800">Or add manually</summary>
+        <.form for={%{}} phx-submit="add_song" class="mt-3">
+          <div class="mb-3">
+            <input 
+              type="text" 
+              name="added_by" 
+              placeholder="Your name"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+          
+          <div class="mb-3">
+            <input 
+              type="text" 
+              name="title" 
+              placeholder="Song title"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+
+          <div class="mb-3">
+            <input 
+              type="text" 
+              name="artist" 
+              placeholder="Artist"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+
+          <button 
+            type="submit"
+            class="w-full bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 transition"
+          >
+            Add Manually
+          </button>
+        </.form>
+      </details>
     </div>
 
     <!-- Queue Display -->

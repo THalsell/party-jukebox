@@ -40,6 +40,7 @@ defmodule PartyJukebox.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      
       {:phoenix, "~> 1.8.1"},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.13"},
@@ -65,7 +66,9 @@ defmodule PartyJukebox.MixProject do
       {:gettext, "~> 0.26"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},
-      {:bandit, "~> 1.5"}
+      {:bandit, "~> 1.5"},
+      {:httpoison, "~> 2.0"},
+      {:jason, "~> 1.4"}
     ]
   end
 
