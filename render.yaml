@@ -18,7 +18,7 @@ services:
       - key: SECRET_KEY_BASE
         generateValue: true
       - key: PHX_HOST
-        sync: false
+        value: party-jukebox.onrender.com
       - key: YOUTUBE_API_KEY
         sync: false
       - key: POOL_SIZE
