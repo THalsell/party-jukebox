@@ -161,6 +161,6 @@ defmodule PartyJukeboxWeb.PartyLive.Show do
 
   url
   |> EQRCode.encode()
-  |> EQRCode.svg(width: 200, height: 200, viewbox: true, background_color: "#ffffff", color: "#000000")
+  |> EQRCode.svg(color: "#000", background_color: "#FFF", width: 200)
 end
 end
