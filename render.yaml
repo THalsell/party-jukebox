@@ -9,7 +9,7 @@ services:
     runtime: elixir
     plan: free
     buildCommand: "./render-build.sh"
-    startCommand: "_build/prod/rel/party_jukebox/bin/party_jukebox eval 'PartyJukebox.Release.migrate()' && PHX_SERVER=true _build/prod/rel/party_jukebox/bin/party_jukebox start"
+    startCommand: "_build/prod/rel/party_jukebox/bin/party_jukebox eval PartyJukebox.Release.migrate && PHX_SERVER=true _build/prod/rel/party_jukebox/bin/party_jukebox start"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
