@@ -55,21 +55,30 @@ Starts playing the first song in the queue.
 """
 def play_next_song(party_id) do
   party = Repo.get!(Party, party_id) |> Repo.preload(:currently_playing)
-  
+
+  # Remove currently playing song from queue if it exists
+  if party.currently_playing_id do
+    Repo.get(QueuedSong, party.currently_playing_id)
+    |> case do
+      nil -> :ok
+      song -> Repo.delete(song)
+    end
+  end
+
   # Get the next song in queue
   next_song = QueuedSong
               |> where([s], s.party_id == ^party_id)
               |> order_by([s], s.position)
               |> limit(1)
               |> Repo.one()
-  
+
   case next_song do
-    nil -> 
+    nil ->
       # No songs in queue, stop playing
       party
       |> Ecto.Changeset.change(%{currently_playing_id: nil})
       |> Repo.update()
-    
+
     song ->
       # Set this song as currently playing
       party
